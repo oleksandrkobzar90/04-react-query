@@ -9,6 +9,7 @@ import MovieModal from "../MovieModal/MovieModal.tsx";
 import type { Movie } from "../../types/movie.ts";
 import { fetchMovies } from "../../services/movieService.ts";
 import toast, { Toaster } from "react-hot-toast";
+import Pagination from "../Pagination/Pagination.tsx";
 
 export default function App() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
@@ -16,7 +17,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isSuccess, isFetching } = useQuery({
     queryKey: ["movie", query, currentPage],
     queryFn: () => fetchMovies(query, currentPage),
     enabled: query !== "",
@@ -24,10 +25,10 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (data && data.results.length === 0) {
+    if (!isFetching && data?.results.length === 0) {
       toast.error("No movies found for your request.");
     }
-  }, [data]);
+  }, [data, isFetching]);
 
   const handleSearch = async (newQuery: string) => {
     setQuery(newQuery);
@@ -57,21 +58,13 @@ export default function App() {
         }}
       />
       <SearchBar onSubmit={handleSearch} />
-      <p>
-        Current page {currentPage} | Total pages {totalPages}
-      </p>
-      <button
-        onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-        disabled={currentPage === 1}
-      >
-        Previous
-      </button>
-      <button
-        onClick={() => setCurrentPage(currentPage + 1)}
-        disabled={currentPage >= totalPages}
-      >
-        Next
-      </button>
+      {isSuccess && totalPages > 1 && (
+        <Pagination
+          totalPages={totalPages}
+          page={currentPage}
+          setPage={setCurrentPage}
+        />
+      )}
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
       {data && data.results.length > 0 && (
