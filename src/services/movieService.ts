@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Movie } from "../types/movie.ts";
 
-interface MovieHttResponse {
+interface MovieHttpResponse {
   results: Movie[];
   total_pages: number;
 }
@@ -17,8 +17,8 @@ axios.defaults.params = {
 export const fetchMovies = async (
   query: string,
   page: number,
-): Promise<MovieHttResponse> => {
-  const response = await axios.get<MovieHttResponse>("/search/movie", {
+): Promise<MovieHttpResponse> => {
+  const response = await axios.get<MovieHttpResponse>("/search/movie", {
     params: { query: String(query), page },
     headers: { Authorization: `Bearer ${myToken}` },
   });
